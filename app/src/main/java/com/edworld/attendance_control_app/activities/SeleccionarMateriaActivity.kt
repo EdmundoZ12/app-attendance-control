@@ -1,11 +1,15 @@
-package com.edworld.attendance_control_app.screens
+package com.edworld.attendance_control_app.activities
 
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -13,63 +17,159 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import com.edworld.attendance_control_app.dataStore
+import com.edworld.attendance_control_app.USER_ID_KEY
 import com.edworld.attendance_control_app.data.models.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+
+class SeleccionarMateriaActivity : ComponentActivity() {
+
+    private var materias by mutableStateOf<List<Materia>>(emptyList())
+    private var isLoading by mutableStateOf(true)
+
+    val url: String = "http://192.168.100.101:3000"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            SeleccionarMateriaScreen(
+                materias = materias,
+                isLoading = isLoading,
+                onNavigateBack = { finish() },
+                onInscribirClick = { materia -> navigateToInscribirEstudiante(materia) },
+                onLoadMaterias = { loadMaterias() }
+            )
+        }
+
+        // Cargar materias al iniciar
+        loadMaterias()
+    }
+
+    private fun loadMaterias() {
+        lifecycleScope.launch {
+            val userId = getUserId()
+            if (userId != null) {
+                getMateriasByDocente(
+                    docenteId = userId.toInt(),
+                    onSuccess = { materiasFromAPI ->
+                        materias = materiasFromAPI
+                        isLoading = false
+                    },
+                    onError = { error ->
+                        Toast.makeText(this@SeleccionarMateriaActivity, error, Toast.LENGTH_SHORT)
+                            .show()
+                        isLoading = false
+                    }
+                )
+            } else {
+                Toast.makeText(
+                    this@SeleccionarMateriaActivity,
+                    "Error: No se encontró ID del usuario",
+                    Toast.LENGTH_SHORT
+                ).show()
+                isLoading = false
+            }
+        }
+    }
+
+    private fun getMateriasByDocente(
+        docenteId: Int,
+        onSuccess: (List<Materia>) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.client.get("${url}/academic/materias") {
+                    contentType(ContentType.Application.Json)
+                    setBody(GetMateriasRequest(docenteId))
+                }
+
+                when (response.status) {
+                    HttpStatusCode.OK -> {
+                        val materiaResponse: MateriaResponse = response.body()
+                        onSuccess(materiaResponse.materias)
+                    }
+
+                    HttpStatusCode.NotFound -> {
+                        onError("No se encontraron materias")
+                    }
+
+                    HttpStatusCode.InternalServerError -> {
+                        onError("Error interno del servidor")
+                    }
+
+                    else -> {
+                        onError("Error desconocido: ${response.status}")
+                    }
+                }
+            } catch (e: Exception) {
+                onError("Error de conexión: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    private fun navigateToInscribirEstudiante(materia: Materia) {
+        val intent = Intent(this, InscribirEstudianteActivity::class.java)
+        intent.putExtra("materia_id", materia.id)
+        intent.putExtra("materia_nombre", materia.nombre)
+        intent.putExtra("materia_codigo", materia.codigo)
+        intent.putExtra("materia_grupo", materia.grupo)
+        startActivity(intent)
+    }
+
+    private suspend fun getUserId(): String? {
+        return dataStore.data.first()[USER_ID_KEY]
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeDocenteScreen(
-    onCrearMateriaClick: () -> Unit = {},
-    onEditarMateriaClick: (Int) -> Unit = {},
-    onQRScanClick: () -> Unit = {},
-    onAsistenciasClick: () -> Unit = {},
-    onInscribirEstudiantesClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {},
+fun SeleccionarMateriaScreen(
     materias: List<Materia> = emptyList(),
     isLoading: Boolean = false,
+    onNavigateBack: () -> Unit = {},
+    onInscribirClick: (Materia) -> Unit = {},
     onLoadMaterias: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
-    var selectedTab by remember { mutableStateOf(0) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Gestionar Materias",
+                        text = "Seleccionar Materia",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = Color.White
                     )
                 },
-                actions = {
-                    IconButton(onClick = onLogoutClick) {
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ExitToApp,
-                            contentDescription = "Cerrar sesión",
-                            tint = Color(0xFF1E3A8A)
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = Color(0xFF1E3A8A)
                 )
-            )
-        },
-        bottomBar = {
-            BottomNavigation(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
-                onAsistenciasClick = onAsistenciasClick,
-                onInscribirEstudiantesClick = onInscribirEstudiantesClick // PASAR LA FUNCIÓN
             )
         }
     ) { paddingValues ->
@@ -85,20 +185,18 @@ fun HomeDocenteScreen(
                 color = Color.Gray.copy(alpha = 0.3f)
             )
 
-            // Barra de búsqueda y botón crear materia
-            Row(
+            // Barra de búsqueda
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
-                // Campo de búsqueda
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    modifier = Modifier.weight(0.6f),
-                    placeholder = { Text("Buscar...", color = Color.Gray) },
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    placeholder = { Text("Buscar materia...", color = Color.Gray) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -106,7 +204,7 @@ fun HomeDocenteScreen(
                             tint = Color.Gray
                         )
                     },
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(25.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF1E3A8A),
                         unfocusedBorderColor = Color.Gray,
@@ -114,28 +212,6 @@ fun HomeDocenteScreen(
                         unfocusedContainerColor = Color.White
                     )
                 )
-
-                // Botón Crear Materia
-                Button(
-                    onClick = onCrearMateriaClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFDC2626)
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.height(56.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Agregar",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Crear Materia",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
             }
 
             // Contenido principal
@@ -176,16 +252,17 @@ fun HomeDocenteScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No tienes materias registradas",
+                            text = "No hay materias disponibles",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.Gray
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Crea tu primera materia para comenzar",
+                            text = "Crea materias primero para poder inscribir estudiantes",
                             fontSize = 14.sp,
-                            color = Color.Gray
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -202,9 +279,9 @@ fun HomeDocenteScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(materiasFiltradas) { materia ->
-                        MateriaCard(
+                        MateriaInscripcionCard(
                             materia = materia,
-                            onEditarClick = onEditarMateriaClick
+                            onInscribirClick = onInscribirClick
                         )
                     }
 
@@ -219,7 +296,10 @@ fun HomeDocenteScreen(
 }
 
 @Composable
-private fun MateriaCard(materia: Materia, onEditarClick: (Int) -> Unit = {}) {
+private fun MateriaInscripcionCard(
+    materia: Materia,
+    onInscribirClick: (Materia) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -271,7 +351,7 @@ private fun MateriaCard(materia: Materia, onEditarClick: (Int) -> Unit = {}) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Codigo: ${materia.codigo}    Grupo: ${materia.grupo}",
+                    text = "Código: ${materia.codigo}    Grupo: ${materia.grupo}",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -299,107 +379,46 @@ private fun MateriaCard(materia: Materia, onEditarClick: (Int) -> Unit = {}) {
                         color = Color.Gray
                     )
                 }
-            }
 
-            // Controles del lado derecho
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Estado activo/inactivo
+                // Estado de la materia
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Activo:",
-                        fontSize = 10.sp,
-                        color = Color.Gray
+                    Icon(
+                        imageVector = if (materia.activo) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                        contentDescription = if (materia.activo) "Activa" else "Inactiva",
+                        tint = if (materia.activo) Color(0xFF4CAF50) else Color(0xFFDC2626),
+                        modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Switch(
-                        checked = materia.activo,
-                        onCheckedChange = { println("Cambiar estado materia ${materia.id}") },
-                        modifier = Modifier.scale(0.8f),
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF4CAF50),
-                            uncheckedThumbColor = Color.White,
-                            uncheckedTrackColor = Color.Gray
-                        )
-                    )
-                }
-
-                // Botón Editar
-                Button(
-                    onClick = { onEditarClick(materia.id) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1E3A8A)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.height(28.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
-                ) {
                     Text(
-                        text = "Editar",
+                        text = if (materia.activo) "Activa" else "Inactiva",
                         fontSize = 10.sp,
-                        color = Color.White
+                        color = if (materia.activo) Color(0xFF4CAF50) else Color(0xFFDC2626),
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun BottomNavigation(
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit,
-    onAsistenciasClick: () -> Unit = {},
-    onInscribirEstudiantesClick: () -> Unit = {} // NUEVO PARÁMETRO
-) {
-    val tabs = listOf(
-        Triple(Icons.Default.Book, "Materias", Color(0xFF1E3A8A)),
-        Triple(Icons.Default.PersonAdd, "Inscribir", Color.Gray), // ESTE BOTÓN AHORA FUNCIONA
-        Triple(Icons.Default.Assignment, "Asistencias", Color.Gray),
-        Triple(Icons.Default.Person, "Perfil", Color.Gray)
-    )
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.White,
-        shadowElevation = 8.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            tabs.forEachIndexed { index, (icon, label, color) ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable {
-                        when (index) {
-                            1 -> onInscribirEstudiantesClick() // INSCRIBIR ESTUDIANTES
-                            2 -> onAsistenciasClick() // ASISTENCIAS
-                            else -> onTabSelected(index)
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label,
-                        tint = if (selectedTab == index) Color(0xFF1E3A8A) else Color.Gray,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = label,
-                        fontSize = 10.sp,
-                        color = if (selectedTab == index) Color(0xFF1E3A8A) else Color.Gray,
-                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
-                    )
-                }
+            // Botón Inscribir
+            Button(
+                onClick = { onInscribirClick(materia) },
+                enabled = materia.activo, // Solo habilitar si la materia está activa
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFDC2626),
+                    disabledContainerColor = Color.Gray
+                ),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.height(32.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+            ) {
+                Text(
+                    text = "Inscribir",
+                    fontSize = 12.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }

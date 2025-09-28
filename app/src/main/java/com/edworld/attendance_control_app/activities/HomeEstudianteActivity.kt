@@ -60,7 +60,8 @@ class HomeEstudianteActivity : ComponentActivity() {
     }
 
     private fun navigateToAsistencia() {
-        Toast.makeText(this, "Navegando a marcar asistencia...", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, HistorialAsistenciasActivity::class.java)
+        startActivity(intent)
     }
 
     private fun logout() {
@@ -86,6 +87,8 @@ class HomeEstudianteActivity : ComponentActivity() {
             grantResults = grantResults,
             onLocationGranted = {
                 Toast.makeText(this, "Permisos de ubicación concedidos", Toast.LENGTH_SHORT).show()
+                // Navegar a asistencia después de conceder permisos
+                navigateToAsistencia()
             },
             onLocationDenied = {
                 Toast.makeText(
@@ -96,6 +99,8 @@ class HomeEstudianteActivity : ComponentActivity() {
             },
             onCameraGranted = {
                 Toast.makeText(this, "Permiso de cámara concedido", Toast.LENGTH_SHORT).show()
+                // Navegar a QR scanner después de conceder permisos
+                navigateToQRScanner()
             },
             onCameraDenied = {
                 Toast.makeText(

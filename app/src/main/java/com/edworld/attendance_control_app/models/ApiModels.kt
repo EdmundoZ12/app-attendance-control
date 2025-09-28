@@ -129,3 +129,176 @@ data class HorarioOperationResponse(val message: String, val horario: Horario)
 data class CambiarEstadoMateriaRequest(
     val id: Int
 )
+
+// Información básica del estudiante
+data class EstudianteInfo(
+    val id: Int,
+    val nombre: String,
+    val apellido: String,
+    val email: String,
+    val carrera: String
+)
+
+// Response para búsqueda de estudiante por email
+data class EstudianteResponse(
+    val estudiante: EstudianteInfo
+)
+
+// Request para inscribir estudiante a materia
+data class InscribirEstudianteRequest(
+    val materia_id: Int,
+    val estudiante_id: Int
+)
+
+// Response para inscripción exitosa
+data class InscripcionResponse(
+    val message: String,
+    val asignacion: AsignacionInfo
+)
+
+data class AsignacionInfo(
+    val estudiante_id: Int,
+    val materia_id: Int
+)
+
+// Request para obtener estudiantes inscritos en una materia
+data class EstudiantesInscritosRequest(
+    val materia_id: Int
+)
+
+// Response para lista de estudiantes inscritos
+data class EstudiantesInscritosResponse(
+    val message: String,
+    val materia: MateriaBasicInfo,
+    val estudiantes: List<EstudianteInfo>,
+    val total_estudiantes: Int
+)
+
+// Información básica de la materia para respuestas
+data class MateriaBasicInfo(
+    val id: Int,
+    val nombre: String,
+    val codigo: String,
+    val grupo: String
+)
+
+// Request para generar QR
+data class GenerarQRRequest(
+    val materia_id: Int,
+    val horario_id: Int,
+    val docente_id: Int
+)
+
+// Response del QR generado
+data class QRGeneratedResponse(
+    val message: String,
+    val qr: QRData
+)
+
+data class QRData(
+    val qr_token: String,
+    val qr_image: String,
+    val expires_at: String,
+    val horario: HorarioQR
+)
+
+data class HorarioQR(
+    val id: Int,
+    val dia_semana: String,
+    val hora_inicio: String,
+    val hora_fin: String
+)
+
+// Datos extraídos del QR escaneado
+data class QRClassData(
+    val materiaId: Int,
+    val horarioId: Int,
+    val docenteId: Int,
+    val materiaNombre: String,
+    val diaSemana: String,
+    val horaInicio: String,
+    val horaFin: String,
+    val fecha: String,
+    val exp: Long
+)
+
+// Datos de ubicación GPS
+data class LocationData(
+    val latitud: Double,
+    val longitud: Double
+)
+
+// Request para registrar asistencia
+data class RegistrarAsistenciaRequest(
+    val qr_token: String,
+    val estudiante_id: Int,
+    val ubicacion_lat: Double,
+    val ubicacion_lng: Double
+)
+
+// Response de asistencia registrada exitosamente
+data class AsistenciaRegistradaResponse(
+    val message: String,
+    val asistencia: AsistenciaData,
+    val distancia_metros: Int,
+    val horario: HorarioData
+)
+
+data class AsistenciaData(
+    val id: Int,
+    val estudiante_id: Int,
+    val materia_id: Int,
+    val fecha: String,
+    val hora_registro: String,
+    val ubicacion_lat: Double,
+    val ubicacion_lng: Double
+)
+
+data class HorarioData(
+    val dia: String,
+    val inicio: String,
+    val fin: String
+)
+
+// MODELOS PARA HISTORIAL DE ASISTENCIAS
+
+// Modelo para mostrar en el historial del estudiante
+// Agregar estos modelos a tu archivo ApiModels.kt
+// Asegúrate de tener el import correcto:
+// import kotlinx.serialization.Serializable
+
+// Request para obtener asistencias del estudiante
+data class GetAsistenciasEstudianteRequest(
+    val estudiante_id: Int
+)
+
+// Response del endpoint de asistencias del estudiante
+data class AsistenciasEstudianteResponse(
+    val asistencias: List<AsistenciaEstudianteData>
+)
+
+// Datos de cada asistencia desde la API
+data class AsistenciaEstudianteData(
+    val id: Int,
+    val estudiante_id: Int,
+    val materia_id: Int,
+    val fecha: String,
+    val hora_registro: String,
+    val ubicacion_lat: Double,
+    val ubicacion_lng: Double,
+    val materia_nombre: String,
+    val materia_codigo: String
+)
+
+// Modelo para la UI del historial
+data class AsistenciaHistorial(
+    val id: Int,
+    val estudianteId: Int,
+    val materiaId: Int,
+    val materiaNombre: String,
+    val materiaCodigo: String,
+    val fecha: String,
+    val horaRegistro: String,
+    val ubicacionLat: Double,
+    val ubicacionLng: Double
+)

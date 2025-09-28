@@ -62,8 +62,9 @@ class HomeDocenteActivity : ComponentActivity() {
                 onCrearMateriaClick = { checkLocationForCrearMateria() },
                 onEditarMateriaClick = { materiaId -> navigateToEditarMateria(materiaId) },
                 onQRScanClick = { checkCameraForQR() },
-                onAsistenciasClick = { checkLocationForAsistencias() },
+                onAsistenciasClick = { navigateToAsistencias() },
                 onLogoutClick = { logout() },
+                onInscribirEstudiantesClick = { navigateToInscribirEstudiantes() },
                 materias = materias,
                 isLoading = isLoading,
                 onLoadMaterias = {
@@ -87,6 +88,16 @@ class HomeDocenteActivity : ComponentActivity() {
 
     private suspend fun getUserId(): String? {
         return dataStore.data.first()[USER_ID_KEY]
+    }
+
+    private fun navigateToInscribirEstudiantes() {
+        val intent = Intent(this, SeleccionarMateriaActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToAsistencias() {
+        val intent = Intent(this, AsistenciasActivity::class.java)
+        startActivity(intent)
     }
 
     private fun loadMateriasInitial() {
@@ -200,18 +211,6 @@ class HomeDocenteActivity : ComponentActivity() {
         }
     }
 
-    private fun checkLocationForAsistencias() {
-        if (PermissionManager.hasLocationPermission(this)) {
-            navigateToAsistencias()
-        } else {
-            Toast.makeText(
-                this,
-                "Se necesita acceso a ubicación para gestionar asistencias",
-                Toast.LENGTH_SHORT
-            ).show()
-            PermissionManager.requestLocationPermission(this)
-        }
-    }
 
     private fun navigateToCrearMateria() {
         val intent = Intent(this, MateriaActivity::class.java)
@@ -230,9 +229,6 @@ class HomeDocenteActivity : ComponentActivity() {
         Toast.makeText(this, "Abriendo QR Scanner...", Toast.LENGTH_SHORT).show()
     }
 
-    private fun navigateToAsistencias() {
-        Toast.makeText(this, "Navegando a Asistencias...", Toast.LENGTH_SHORT).show()
-    }
 
     private fun logout() {
         lifecycleScope.launch {
