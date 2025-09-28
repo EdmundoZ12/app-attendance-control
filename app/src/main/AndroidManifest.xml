@@ -38,6 +38,10 @@
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:usesCleartextTraffic="true">
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC0pR1Uq7PzZxKBWIwRwObqk2Hy-ZElfJU" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -54,9 +58,20 @@
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
 
         <activity
+            android:name=".activities.MateriaActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+
+        <activity
             android:name=".activities.HomeEstudianteActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+
+        <activity
+            android:name=".activities.MapSelectionActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+
     </application>
 
 </manifest>

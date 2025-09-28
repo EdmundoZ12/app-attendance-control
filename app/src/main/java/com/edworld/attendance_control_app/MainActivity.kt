@@ -46,52 +46,16 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.launch
+import com.edworld.attendance_control_app.data.models.*
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val TOKEN_KEY = stringPreferencesKey("auth_token")
 val USER_ID_KEY = stringPreferencesKey("user_id")
 val USER_ROL_KEY = stringPreferencesKey("user_rol")
 
-data class LoginRequest(val email: String, val password: String)
-data class LoginResponse(val message: String, val token: String, val user: User)
-
-data class RegisterStudentRequest(
-    val nombre: String,
-    val apellido: String,
-    val email: String,
-    val password: String,
-    val carrera: String
-)
-
-data class RegisterTeacherRequest(
-    val nombre: String,
-    val apellido: String,
-    val email: String,
-    val password: String,
-    val titulo: String
-)
-
-data class RegisterResponse(
-    val message: String,
-    val estudiante: User
-)
-
-data class RegisterTeacherResponse(
-    val message: String,
-    val docente: User
-)
-
-data class User(
-    val id: Int,
-    val nombre: String,
-    val apellido: String,
-    val email: String,
-    val rol: String
-)
-
 class MainActivity : ComponentActivity() {
 
-    val url: String = "http://172.20.10.3:3000"
+    val url: String = "http://192.168.100.101:3000"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

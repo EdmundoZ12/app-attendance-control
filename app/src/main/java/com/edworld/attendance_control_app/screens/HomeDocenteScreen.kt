@@ -1,7 +1,6 @@
 package com.edworld.attendance_control_app.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,46 +13,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class Materia(
-    val id: Int,
-    val nombre: String,
-    val codigo: String,
-    val grupo: String,
-    val ubicacionGPS: String,
-    val activo: Boolean
-)
+import com.edworld.attendance_control_app.data.models.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeDocenteScreen(
     onCrearMateriaClick: () -> Unit = {},
+    onEditarMateriaClick: (Int) -> Unit = {},
     onQRScanClick: () -> Unit = {},
     onAsistenciasClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    materias: List<Materia> = emptyList(),
+    isLoading: Boolean = false,
+    onLoadMaterias: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
     var selectedTab by remember { mutableStateOf(0) }
-
-    // Lista de materias de ejemplo
-    val materias = remember {
-        listOf(
-            Materia(1, "Introduccion a la Informatica", "INF123", "SA", "UBICACION GPS", true),
-            Materia(2, "Introduccion a la Informatica", "INF123", "SA", "UBICACION GPS", true),
-            Materia(3, "Introduccion a la Informatica", "INF123", "SA", "UBICACION GPS", true),
-            Materia(4, "Introduccion a la Informatica", "INF123", "SA", "UBICACION GPS", true),
-            Materia(5, "Introduccion a la Informatica", "INF123", "SA", "UBICACION GPS", false)
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -95,7 +77,7 @@ fun HomeDocenteScreen(
                 .padding(paddingValues)
                 .background(Color(0xFFF5F5F5))
         ) {
-            // Línea separadora debajo del TopBar
+            // Línea separadora
             Divider(
                 thickness = 1.dp,
                 color = Color.Gray.copy(alpha = 0.3f)
@@ -109,11 +91,11 @@ fun HomeDocenteScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Campo de búsqueda MÁS CORTO
+                // Campo de búsqueda
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    modifier = Modifier.weight(0.6f), // Reducido de weight(1f) a weight(0.6f)
+                    modifier = Modifier.weight(0.6f),
                     placeholder = { Text("Buscar...", color = Color.Gray) },
                     leadingIcon = {
                         Icon(
@@ -154,22 +136,80 @@ fun HomeDocenteScreen(
                 }
             }
 
-            // Lista de materias
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(materias.filter {
-                    it.nombre.contains(searchText, ignoreCase = true) ||
-                            it.codigo.contains(searchText, ignoreCase = true)
-                }) { materia ->
-                    MateriaCard(materia = materia)
+            // Contenido principal
+            if (isLoading) {
+                // Indicador de carga
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFF1E3A8A)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Cargando materias...",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            } else if (materias.isEmpty()) {
+                // Estado vacío
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MenuBook,
+                            contentDescription = "Sin materias",
+                            modifier = Modifier.size(64.dp),
+                            tint = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No tienes materias registradas",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Crea tu primera materia para comenzar",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            } else {
+                // Lista de materias
+                val materiasFiltradas = materias.filter { materia ->
+                    materia.nombre.contains(searchText, ignoreCase = true) ||
+                            materia.codigo.contains(searchText, ignoreCase = true)
                 }
 
-                // Espacio adicional al final
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(materiasFiltradas) { materia ->
+                        MateriaCard(
+                            materia = materia,
+                            onEditarClick = onEditarMateriaClick // AGREGAR ESTA LÍNEA
+                        )
+                    }
+
+                    // Espacio adicional al final
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }
@@ -177,7 +217,7 @@ fun HomeDocenteScreen(
 }
 
 @Composable
-private fun MateriaCard(materia: Materia) {
+private fun MateriaCard(materia: Materia, onEditarClick: (Int) -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -247,7 +287,12 @@ private fun MateriaCard(materia: Materia) {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = materia.ubicacionGPS,
+                        text = "Lat: ${
+                            String.format(
+                                "%.4f",
+                                materia.latitud
+                            )
+                        }, Lng: ${String.format("%.4f", materia.longitud)}",
                         fontSize = 10.sp,
                         color = Color.Gray
                     )
@@ -304,7 +349,7 @@ private fun MateriaCard(materia: Materia) {
 
                     // Botón Editar
                     Button(
-                        onClick = { println("Editar materia ${materia.id}") },
+                        onClick = { onEditarClick(materia.id) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF1E3A8A)
                         ),
@@ -352,7 +397,7 @@ private fun BottomNavigation(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.clickable {
-                        if (index == 2) { // Tab de Asistencias
+                        if (index == 2) {
                             onAsistenciasClick()
                         } else {
                             onTabSelected(index)
