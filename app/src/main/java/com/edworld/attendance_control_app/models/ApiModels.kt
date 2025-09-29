@@ -1,5 +1,10 @@
 package com.edworld.attendance_control_app.data.models
 
+object Constants {
+//    const val BASE_URL = "http://172.20.10.3:3000"
+    const val BASE_URL = "http://192.168.100.101:3000"
+}
+
 // Modelos para Login
 data class LoginRequest(val email: String, val password: String)
 data class LoginResponse(val message: String, val token: String, val user: User)

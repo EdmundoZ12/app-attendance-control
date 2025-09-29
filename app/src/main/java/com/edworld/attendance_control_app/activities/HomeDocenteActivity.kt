@@ -41,7 +41,8 @@ class HomeDocenteActivity : ComponentActivity() {
     // Launcher para crear/editar materia
     private lateinit var crearMateriaLauncher: ActivityResultLauncher<Intent>
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+    //    val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -159,7 +160,7 @@ class HomeDocenteActivity : ComponentActivity() {
     ) {
         lifecycleScope.launch {
             try {
-                val response = ApiClient.client.get("${url}/academic/materias") {
+                val response = ApiClient.client.get("${Constants.BASE_URL}/academic/materias") {
                     contentType(ContentType.Application.Json)
                     setBody(GetMateriasRequest(docenteId))
                 }

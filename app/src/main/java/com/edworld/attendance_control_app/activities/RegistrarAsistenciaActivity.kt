@@ -64,7 +64,8 @@ class RegistrarAsistenciaActivity : ComponentActivity() {
     // Cliente de ubicación
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+//        val url:String="http://172.20.10.3:300"
 
     // Launcher para QR Scanner usando Intent
     private val qrScannerLauncher = registerForActivityResult(
@@ -262,7 +263,7 @@ class RegistrarAsistenciaActivity : ComponentActivity() {
                     ubicacion_lng = ubicacionActual!!.longitud
                 )
 
-                val response = ApiClient.client.post("${url}/attendance/asistencia") {
+                val response = ApiClient.client.post("${Constants.BASE_URL}/attendance/asistencia") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }

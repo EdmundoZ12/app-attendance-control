@@ -47,7 +47,8 @@ class HorariosAsistenciaActivity : ComponentActivity() {
     private var materiaCodigo by mutableStateOf("")
     private var materiaGrupo by mutableStateOf("")
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+    //    val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +83,7 @@ class HorariosAsistenciaActivity : ComponentActivity() {
             try {
                 val request = ObtenerHorariosRequest(materia_id = materiaId)
 
-                val response = ApiClient.client.get("${url}/academic/materias/horarios") {
+                val response = ApiClient.client.get("${Constants.BASE_URL}/academic/materias/horarios") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }

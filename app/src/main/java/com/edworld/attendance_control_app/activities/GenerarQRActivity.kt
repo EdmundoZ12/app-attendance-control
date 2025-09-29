@@ -59,7 +59,8 @@ class GenerarQRActivity : ComponentActivity() {
     private var horarioFin by mutableStateOf("")
     private var docenteId by mutableStateOf(0)
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+    //    val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +111,7 @@ class GenerarQRActivity : ComponentActivity() {
                     docente_id = docenteId
                 )
 
-                val response = ApiClient.client.post("${url}/academic/materia/qr") {
+                val response = ApiClient.client.post("${Constants.BASE_URL}/academic/materia/qr") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }

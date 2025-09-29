@@ -42,7 +42,8 @@ class MateriaActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     // URL del servidor
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+//        val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -266,7 +267,7 @@ class MateriaActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 // Llamada 1: Obtener datos de la materia
-                val materiaResponse = ApiClient.client.get("${url}/academic/materia") {
+                val materiaResponse = ApiClient.client.get("${Constants.BASE_URL}/academic/materia") {
                     contentType(ContentType.Application.Json)
                     setBody(ObtenerMateriaRequest(materiaId))
                 }
@@ -279,7 +280,7 @@ class MateriaActivity : ComponentActivity() {
                 val materia = materiaResponse.body<MateriaResponseSingle>().materia
 
                 // Llamada 2: Obtener horarios de la materia
-                val horariosResponse = ApiClient.client.get("${url}/academic/materias/horarios") {
+                val horariosResponse = ApiClient.client.get("${Constants.BASE_URL}/academic/materias/horarios") {
                     contentType(ContentType.Application.Json)
                     setBody(ObtenerHorariosRequest(materiaId))
                 }
@@ -336,7 +337,7 @@ class MateriaActivity : ComponentActivity() {
                     horarios = horariosRequest
                 )
 
-                val response = ApiClient.client.post("${url}/academic/materia") {
+                val response = ApiClient.client.post("${Constants.BASE_URL}/academic/materia") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -405,7 +406,7 @@ class MateriaActivity : ComponentActivity() {
                     activo = activo
                 )
 
-                val response = ApiClient.client.put("${url}/academic/materia") {
+                val response = ApiClient.client.put("${Constants.BASE_URL}/academic/materia") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -462,7 +463,7 @@ class MateriaActivity : ComponentActivity() {
                     hora_fin = horaFin
                 )
 
-                val response = ApiClient.client.post("${url}/academic/materia/horario") {
+                val response = ApiClient.client.post("${Constants.BASE_URL}/academic/materia/horario") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -514,7 +515,7 @@ class MateriaActivity : ComponentActivity() {
                     hora_fin = horaFin
                 )
 
-                val response = ApiClient.client.put("${url}/academic/materia/horario") {
+                val response = ApiClient.client.put("${Constants.BASE_URL}/academic/materia/horario") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -562,7 +563,7 @@ class MateriaActivity : ComponentActivity() {
             try {
                 val request = EliminarHorarioRequest(horarioId)
 
-                val response = ApiClient.client.delete("${url}/academic/materia/horario") {
+                val response = ApiClient.client.delete("${Constants.BASE_URL}/academic/materia/horario") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -605,7 +606,7 @@ class MateriaActivity : ComponentActivity() {
             try {
                 val request = CambiarEstadoMateriaRequest(materiaId)
 
-                val response = ApiClient.client.patch("${url}/academic/materia") {
+                val response = ApiClient.client.patch("${Constants.BASE_URL}/academic/materia") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }

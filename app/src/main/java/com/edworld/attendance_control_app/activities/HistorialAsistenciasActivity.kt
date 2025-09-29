@@ -41,7 +41,8 @@ class HistorialAsistenciasActivity : ComponentActivity() {
     private var errorMessage by mutableStateOf("")
     private var nombreEstudiante by mutableStateOf("Estudiante")
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+    //    val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,7 +122,7 @@ class HistorialAsistenciasActivity : ComponentActivity() {
             try {
                 val request = GetAsistenciasEstudianteRequest(estudiante_id = estudianteId)
 
-                val response = ApiClient.client.get("${url}/attendance/asistencia/estudiante") {
+                val response = ApiClient.client.get("${Constants.BASE_URL}/attendance/asistencia/estudiante") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }

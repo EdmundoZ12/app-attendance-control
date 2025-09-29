@@ -38,7 +38,8 @@ class AsistenciasActivity : ComponentActivity() {
     private var materias by mutableStateOf<List<Materia>>(emptyList())
     private var isLoading by mutableStateOf(true)
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+//    val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,7 +92,7 @@ class AsistenciasActivity : ComponentActivity() {
     ) {
         lifecycleScope.launch {
             try {
-                val response = ApiClient.client.get("${url}/academic/materias") {
+                val response = ApiClient.client.get("${Constants.BASE_URL}/academic/materias") {
                     contentType(ContentType.Application.Json)
                     setBody(GetMateriasRequest(docenteId))
                 }

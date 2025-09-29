@@ -55,7 +55,8 @@ val USER_ROL_KEY = stringPreferencesKey("user_rol")
 
 class MainActivity : ComponentActivity() {
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+//        val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,7 +117,7 @@ class MainActivity : ComponentActivity() {
     ) {
         lifecycleScope.launch {
             try {
-                val response = KtorClient.client.post("${url}/auth/login") {
+                val response = KtorClient.client.post("${Constants.BASE_URL}/auth/login") {
                     contentType(ContentType.Application.Json)
                     setBody(LoginRequest(email, password))
                 }
@@ -159,7 +160,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 val response =
-                    KtorClient.client.post("${url}/auth/register/student") {
+                    KtorClient.client.post("${Constants.BASE_URL}/auth/register/student") {
                         contentType(ContentType.Application.Json)
                         setBody(RegisterStudentRequest(nombre, apellido, email, password, carrera))
                     }
@@ -201,7 +202,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 val response =
-                    KtorClient.client.post("${url}/auth/register/teacher") {
+                    KtorClient.client.post("${Constants.BASE_URL}/auth/register/teacher") {
                         contentType(ContentType.Application.Json)
                         setBody(RegisterTeacherRequest(nombre, apellido, email, password, titulo))
                     }

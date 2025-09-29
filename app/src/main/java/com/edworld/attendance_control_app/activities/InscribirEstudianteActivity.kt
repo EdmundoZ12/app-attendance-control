@@ -53,7 +53,8 @@ class InscribirEstudianteActivity : ComponentActivity() {
     private var materiaCodigo by mutableStateOf("")
     private var materiaGrupo by mutableStateOf("")
 
-    val url: String = "http://192.168.100.101:3000"
+//    val url: String = "http://192.168.100.101:3000"
+//        val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +116,7 @@ class InscribirEstudianteActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             try {
-                val response = ApiClient.client.get("${url}/auth/student") {
+                val response = ApiClient.client.get("${Constants.BASE_URL}/auth/student") {
                     parameter("email", emailEstudiante)
                 }
 
@@ -180,7 +181,7 @@ class InscribirEstudianteActivity : ComponentActivity() {
                     estudiante_id = estudianteEncontrado!!.id
                 )
 
-                val response = ApiClient.client.post("${url}/academic/asignacion") {
+                val response = ApiClient.client.post("${Constants.BASE_URL}/academic/asignacion") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -239,7 +240,7 @@ class InscribirEstudianteActivity : ComponentActivity() {
             try {
                 val request = EstudiantesInscritosRequest(materia_id = materiaId)
 
-                val response = ApiClient.client.get("${url}/academic/asignacion/estudiantes") {
+                val response = ApiClient.client.get("${Constants.BASE_URL}/academic/asignacion/estudiantes") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
