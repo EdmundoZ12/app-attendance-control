@@ -295,7 +295,7 @@ private fun SeccionHorariosEdicion(
     var horarioAEditar by remember { mutableStateOf<Horario?>(null) }
 
     val diasSemana =
-        listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+        listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
 
     Column {
         // Título con botón de agregar
@@ -632,7 +632,7 @@ private fun EditarHorarioDialog(
     var showTimePickerFin by remember { mutableStateOf(false) }
 
     val diasSemana =
-        listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+        listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -956,7 +956,7 @@ private fun SeccionHorarios(
     var showTimePickerFin by remember { mutableStateOf(false) }
 
     val diasSemana =
-        listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+        listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
 
     Column {
         // Título con botón de agregar

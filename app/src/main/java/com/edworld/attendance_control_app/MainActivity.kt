@@ -37,7 +37,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
 import com.edworld.attendance_control_app.activities.HistorialAsistenciasActivity
 import com.edworld.attendance_control_app.activities.HomeDocenteActivity
-import com.edworld.attendance_control_app.activities.HomeEstudianteActivity
 import com.edworld.attendance_control_app.screens.RegisterScreen
 import io.ktor.client.*
 import io.ktor.client.call.*

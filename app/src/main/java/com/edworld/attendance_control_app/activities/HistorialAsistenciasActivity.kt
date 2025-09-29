@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.edworld.attendance_control_app.MainActivity
+import com.edworld.attendance_control_app.clearToken
 import com.edworld.attendance_control_app.dataStore
 import com.edworld.attendance_control_app.USER_ID_KEY
 import com.edworld.attendance_control_app.data.models.*
@@ -37,6 +39,7 @@ class HistorialAsistenciasActivity : ComponentActivity() {
     private var isLoading by mutableStateOf(true)
     private var asistencias by mutableStateOf<List<AsistenciaHistorial>>(emptyList())
     private var errorMessage by mutableStateOf("")
+    private var nombreEstudiante by mutableStateOf("Estudiante")
 
     val url: String = "http://192.168.100.101:3000"
 
@@ -45,17 +48,38 @@ class HistorialAsistenciasActivity : ComponentActivity() {
 
         setContent {
             HistorialAsistenciasScreen(
+                nombreEstudiante = nombreEstudiante,
                 asistencias = asistencias,
                 isLoading = isLoading,
                 errorMessage = errorMessage,
-                onNavigateBack = { finish() },
                 onRegistrarAsistencia = { navigateToRegistrarAsistencia() },
+                onLogout = { logout() },
                 onLoadAsistencias = { loadHistorialAsistencias() }
             )
         }
 
-        // Cargar historial al iniciar
+        // Cargar datos al iniciar
+        loadUserData()
         loadHistorialAsistencias()
+    }
+
+    private fun loadUserData() {
+        lifecycleScope.launch {
+            try {
+                val userId = getUserId()
+                if (userId != null) {
+                    // Aquí podrías hacer una llamada al API para obtener el nombre del estudiante
+                    // Por ahora usamos un valor por defecto
+                    nombreEstudiante = "Estudiante"
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@HistorialAsistenciasActivity,
+                    "Error al cargar datos",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     private fun loadHistorialAsistencias() {
@@ -164,6 +188,16 @@ class HistorialAsistenciasActivity : ComponentActivity() {
         startActivity(intent)
     }
 
+    private fun logout() {
+        lifecycleScope.launch {
+            clearToken(this@HistorialAsistenciasActivity)
+            val intent = Intent(this@HistorialAsistenciasActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
+    }
+
     private suspend fun getUserId(): String? {
         return dataStore.data.first()[USER_ID_KEY]
     }
@@ -172,11 +206,12 @@ class HistorialAsistenciasActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistorialAsistenciasScreen(
+    nombreEstudiante: String = "Estudiante",
     asistencias: List<AsistenciaHistorial> = emptyList(),
     isLoading: Boolean = false,
     errorMessage: String = "",
-    onNavigateBack: () -> Unit = {},
     onRegistrarAsistencia: () -> Unit = {},
+    onLogout: () -> Unit = {},
     onLoadAsistencias: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
@@ -185,21 +220,17 @@ fun HistorialAsistenciasScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Mis Asistencias",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White
+                    Column {
+                        Text(
+                            text = "¡Hola, $nombreEstudiante!",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Mis Asistencias",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.8f)
                         )
                     }
                 },
@@ -230,6 +261,14 @@ fun HistorialAsistenciasScreen(
                         Text(
                             text = "Registrar",
                             fontSize = 12.sp
+                        )
+                    }
+                    // Botón logout
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Cerrar sesión",
+                            tint = Color.White
                         )
                     }
                 },
@@ -385,7 +424,7 @@ fun HistorialAsistenciasScreen(
                     }
                 }
             } else if (asistencias.isEmpty()) {
-                // Estado vacío
+                // Estado vacío con llamada a la acción
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -394,7 +433,7 @@ fun HistorialAsistenciasScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            imageVector = Icons.Default.EventBusy,
+                            imageVector = Icons.Default.QrCodeScanner,
                             contentDescription = "Sin asistencias",
                             modifier = Modifier.size(64.dp),
                             tint = Color.Gray
@@ -413,6 +452,30 @@ fun HistorialAsistenciasScreen(
                             color = Color.Gray,
                             textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        // Botón llamativo para primera asistencia
+                        Button(
+                            onClick = onRegistrarAsistencia,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF4CAF50)
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth(0.6f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.QrCodeScanner,
+                                contentDescription = "Registrar Primera Asistencia",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Registrar Primera Asistencia",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             } else {
