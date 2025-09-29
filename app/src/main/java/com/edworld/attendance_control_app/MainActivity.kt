@@ -35,6 +35,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
+import com.edworld.attendance_control_app.activities.HistorialAsistenciasActivity
 import com.edworld.attendance_control_app.activities.HomeDocenteActivity
 import com.edworld.attendance_control_app.activities.HomeEstudianteActivity
 import com.edworld.attendance_control_app.screens.RegisterScreen
@@ -234,7 +235,7 @@ class MainActivity : ComponentActivity() {
     private fun navigateToHome(rol: String) {
         val intent = when (rol.lowercase()) {
             "docente" -> Intent(this, HomeDocenteActivity::class.java)
-            "estudiante" -> Intent(this, HomeEstudianteActivity::class.java)
+            "estudiante" -> Intent(this, HistorialAsistenciasActivity::class.java)
             else -> Intent(this, HomeDocenteActivity::class.java)
         }
         startActivity(intent)
