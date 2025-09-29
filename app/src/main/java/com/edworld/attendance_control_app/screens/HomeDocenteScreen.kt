@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -69,7 +68,7 @@ fun HomeDocenteScreen(
                 selectedTab = selectedTab,
                 onTabSelected = { selectedTab = it },
                 onAsistenciasClick = onAsistenciasClick,
-                onInscribirEstudiantesClick = onInscribirEstudiantesClick // PASAR LA FUNCIÓN
+                onInscribirEstudiantesClick = onInscribirEstudiantesClick
             )
         }
     ) { paddingValues ->
@@ -355,13 +354,12 @@ private fun BottomNavigation(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onAsistenciasClick: () -> Unit = {},
-    onInscribirEstudiantesClick: () -> Unit = {} // NUEVO PARÁMETRO
+    onInscribirEstudiantesClick: () -> Unit = {}
 ) {
     val tabs = listOf(
         Triple(Icons.Default.Book, "Materias", Color(0xFF1E3A8A)),
-        Triple(Icons.Default.PersonAdd, "Inscribir", Color.Gray), // ESTE BOTÓN AHORA FUNCIONA
-        Triple(Icons.Default.Assignment, "Asistencias", Color.Gray),
-        Triple(Icons.Default.Person, "Perfil", Color.Gray)
+        Triple(Icons.Default.PersonAdd, "Inscribir", Color.Gray),
+        Triple(Icons.Default.Assignment, "Asistencias", Color.Gray)
     )
 
     Surface(

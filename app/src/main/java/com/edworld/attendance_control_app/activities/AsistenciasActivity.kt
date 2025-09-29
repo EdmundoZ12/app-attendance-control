@@ -49,6 +49,7 @@ class AsistenciasActivity : ComponentActivity() {
                 isLoading = isLoading,
                 onNavigateBack = { finish() },
                 onVerHorariosClick = { materia -> navigateToHorariosAsistencia(materia) },
+                onVerAsistenciasClick = { materia -> navigateToVerAsistencias(materia) }, // NUEVA FUNCIÓN
                 onLoadMaterias = { loadMaterias() }
             )
         }
@@ -128,6 +129,16 @@ class AsistenciasActivity : ComponentActivity() {
         startActivity(intent)
     }
 
+    // NUEVA FUNCIÓN para navegar a ver asistencias
+    private fun navigateToVerAsistencias(materia: Materia) {
+        val intent = Intent(this, VerAsistenciasMateriaActivity::class.java)
+        intent.putExtra("materia_id", materia.id)
+        intent.putExtra("materia_nombre", materia.nombre)
+        intent.putExtra("materia_codigo", materia.codigo)
+        intent.putExtra("materia_grupo", materia.grupo)
+        startActivity(intent)
+    }
+
     private suspend fun getUserId(): String? {
         return dataStore.data.first()[USER_ID_KEY]
     }
@@ -140,6 +151,7 @@ fun AsistenciasScreen(
     isLoading: Boolean = false,
     onNavigateBack: () -> Unit = {},
     onVerHorariosClick: (Materia) -> Unit = {},
+    onVerAsistenciasClick: (Materia) -> Unit = {}, // NUEVA FUNCIÓN
     onLoadMaterias: () -> Unit = {}
 ) {
     var searchText by remember { mutableStateOf("") }
@@ -220,7 +232,7 @@ fun AsistenciasScreen(
                             color = Color.White
                         )
                         Text(
-                            text = "Selecciona una materia para ver sus horarios",
+                            text = "Selecciona una materia para ver sus horarios o asistencias",
                             fontSize = 12.sp,
                             color = Color.White.copy(alpha = 0.8f)
                         )
@@ -326,7 +338,8 @@ fun AsistenciasScreen(
                     items(materiasFiltradas) { materia ->
                         MateriaAsistenciaCard(
                             materia = materia,
-                            onVerHorariosClick = onVerHorariosClick
+                            onVerHorariosClick = onVerHorariosClick,
+                            onVerAsistenciasClick = onVerAsistenciasClick // PASAR LA NUEVA FUNCIÓN
                         )
                     }
 
@@ -343,7 +356,8 @@ fun AsistenciasScreen(
 @Composable
 private fun MateriaAsistenciaCard(
     materia: Materia,
-    onVerHorariosClick: (Materia) -> Unit = {}
+    onVerHorariosClick: (Materia) -> Unit = {},
+    onVerAsistenciasClick: (Materia) -> Unit = {} // NUEVA FUNCIÓN
 ) {
     Card(
         modifier = Modifier
@@ -353,100 +367,141 @@ private fun MateriaAsistenciaCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Ícono de materia
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        color = Color(0xFF1E3A8A).copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                contentAlignment = Alignment.Center
+            // Fila superior con icono e información
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Assignment,
-                    contentDescription = "Materia",
-                    tint = Color(0xFF1E3A8A),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Información de la materia
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
-            ) {
-                Text(
-                    text = materia.nombre,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E3A8A),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Código: ${materia.codigo}    Grupo: ${materia.grupo}",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Estado de la materia
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                // Ícono de materia
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            color = Color(0xFF1E3A8A).copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (materia.activo) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                        contentDescription = if (materia.activo) "Activa" else "Inactiva",
-                        tint = if (materia.activo) Color(0xFF4CAF50) else Color(0xFFDC2626),
-                        modifier = Modifier.size(12.dp)
+                        imageVector = Icons.Default.Assignment,
+                        contentDescription = "Materia",
+                        tint = Color(0xFF1E3A8A),
+                        modifier = Modifier.size(24.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
+                // Información de la materia
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
+                ) {
                     Text(
-                        text = if (materia.activo) "Materia Activa" else "Materia Inactiva",
-                        fontSize = 10.sp,
-                        color = if (materia.activo) Color(0xFF4CAF50) else Color(0xFFDC2626),
-                        fontWeight = FontWeight.Medium
+                        text = materia.nombre,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E3A8A),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Código: ${materia.codigo}    Grupo: ${materia.grupo}",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Estado de la materia
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (materia.activo) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                            contentDescription = if (materia.activo) "Activa" else "Inactiva",
+                            tint = if (materia.activo) Color(0xFF4CAF50) else Color(0xFFDC2626),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (materia.activo) "Materia Activa" else "Materia Inactiva",
+                            fontSize = 10.sp,
+                            color = if (materia.activo) Color(0xFF4CAF50) else Color(0xFFDC2626),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
 
-            // Botón Ver Horarios
-            Button(
-                onClick = { onVerHorariosClick(materia) },
-                enabled = materia.activo, // Solo habilitar si la materia está activa
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFDC2626),
-                    disabledContainerColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.height(36.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Fila de botones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Schedule,
-                    contentDescription = "Ver horarios",
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Ver Horarios",
-                    fontSize = 11.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium
-                )
+                // Botón Ver Horarios
+                Button(
+                    onClick = { onVerHorariosClick(materia) },
+                    enabled = materia.activo,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFDC2626),
+                        disabledContainerColor = Color.Gray
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = "Ver horarios",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Ver Horarios",
+                        fontSize = 10.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // NUEVO BOTÓN Ver Asistencias
+                Button(
+                    onClick = { onVerAsistenciasClick(materia) },
+                    enabled = materia.activo,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        disabledContainerColor = Color.Gray
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Visibility,
+                        contentDescription = "Ver asistencias",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Ver Asistencias",
+                        fontSize = 10.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }

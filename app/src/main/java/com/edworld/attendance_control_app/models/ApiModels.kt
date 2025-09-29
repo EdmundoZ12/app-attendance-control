@@ -302,3 +302,42 @@ data class AsistenciaHistorial(
     val ubicacionLat: Double,
     val ubicacionLng: Double
 )
+
+// Request para obtener asistencias de una materia
+data class GetAsistenciasMateriaRequest(
+    val materia_id: Int
+)
+
+// Response del endpoint de asistencias por materia
+data class AsistenciasMateriaResponse(
+    val asistencias: List<AsistenciaMateriaData>
+)
+
+// Datos de cada asistencia desde la API (incluye info del estudiante)
+data class AsistenciaMateriaData(
+    val id: Int,
+    val estudiante_id: Int,
+    val materia_id: Int,
+    val fecha: String,
+    val hora_registro: String,
+    val ubicacion_lat: String,
+    val ubicacion_lng: String,
+    val nombre: String,
+    val apellido: String,
+    val email: String,
+    val carrera: String
+)
+
+// Modelo para la UI del docente viendo asistencias
+data class AsistenciaMateria(
+    val id: Int,
+    val estudianteId: Int,
+    val materiaId: Int,
+    val fecha: String,
+    val horaRegistro: String,
+    val ubicacionLat: Double,
+    val ubicacionLng: Double,
+    val nombreCompleto: String,
+    val email: String,
+    val carrera: String
+)
