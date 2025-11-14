@@ -66,6 +66,7 @@ class HomeDocenteActivity : ComponentActivity() {
                 onAsistenciasClick = { navigateToAsistencias() },
                 onLogoutClick = { logout() },
                 onInscribirEstudiantesClick = { navigateToInscribirEstudiantes() },
+                onGenerarQRInscripcion = { materiaId -> navigateToGenerarQRInscripcion(materiaId) }, // NUEVO
                 materias = materias,
                 isLoading = isLoading,
                 onLoadMaterias = {
@@ -89,6 +90,13 @@ class HomeDocenteActivity : ComponentActivity() {
 
     private suspend fun getUserId(): String? {
         return dataStore.data.first()[USER_ID_KEY]
+    }
+
+    // Agregar después de navigateToEditarMateria
+    private fun navigateToGenerarQRInscripcion(materiaId: Int) {
+        val intent = Intent(this, GenerarQRInscripcionActivity::class.java)
+        intent.putExtra("materia_id", materiaId)
+        startActivity(intent)
     }
 
     private fun navigateToInscribirEstudiantes() {

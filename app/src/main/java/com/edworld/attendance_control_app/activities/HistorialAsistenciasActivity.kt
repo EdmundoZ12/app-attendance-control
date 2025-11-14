@@ -54,6 +54,7 @@ class HistorialAsistenciasActivity : ComponentActivity() {
                 isLoading = isLoading,
                 errorMessage = errorMessage,
                 onRegistrarAsistencia = { navigateToRegistrarAsistencia() },
+                onInscribirseClick = { navigateToInscribirseQR() },
                 onLogout = { logout() },
                 onLoadAsistencias = { loadHistorialAsistencias() }
             )
@@ -111,6 +112,11 @@ class HistorialAsistenciasActivity : ComponentActivity() {
                 isLoading = false
             }
         }
+    }
+
+    private fun navigateToInscribirseQR() {
+        val intent = Intent(this, InscribirseQRActivity::class.java)
+        startActivity(intent)
     }
 
     private fun getAsistenciasByEstudiante(
@@ -212,6 +218,7 @@ fun HistorialAsistenciasScreen(
     isLoading: Boolean = false,
     errorMessage: String = "",
     onRegistrarAsistencia: () -> Unit = {},
+    onInscribirseClick: () -> Unit = {}, // NUEVO PARÁMETRO
     onLogout: () -> Unit = {},
     onLoadAsistencias: () -> Unit = {}
 ) {
@@ -244,26 +251,6 @@ fun HistorialAsistenciasScreen(
                             tint = Color.White
                         )
                     }
-                    // Botón principal: Registrar Asistencia
-                    Button(
-                        onClick = onRegistrarAsistencia,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFDC2626)
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.QrCodeScanner,
-                            contentDescription = "Registrar",
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Registrar",
-                            fontSize = 12.sp
-                        )
-                    }
                     // Botón logout
                     IconButton(onClick = onLogout) {
                         Icon(
@@ -291,11 +278,17 @@ fun HistorialAsistenciasScreen(
                 color = Color.Gray.copy(alpha = 0.3f)
             )
 
+            // NUEVA TARJETA DE ACCIONES RÁPIDAS
+            AccionesRapidasCard(
+                onInscribirseClick = onInscribirseClick,
+                onRegistrarAsistencia = onRegistrarAsistencia
+            )
+
             // Información de cabecera
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1E3A8A))
             ) {
@@ -431,7 +424,8 @@ fun HistorialAsistenciasScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.QrCodeScanner,
@@ -448,35 +442,11 @@ fun HistorialAsistenciasScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Usa el botón 'Registrar' para marcar tu primera asistencia",
+                            text = "Primero inscríbete en una materia y luego registra tu asistencia",
                             fontSize = 14.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        // Botón llamativo para primera asistencia
-                        Button(
-                            onClick = onRegistrarAsistencia,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF4CAF50)
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth(0.6f)
-                                .height(48.dp),
-                            shape = RoundedCornerShape(24.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.QrCodeScanner,
-                                contentDescription = "Registrar Primera Asistencia",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Registrar Primera Asistencia",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
                     }
                 }
             } else {
@@ -504,6 +474,95 @@ fun HistorialAsistenciasScreen(
         }
     }
 }
+
+@Composable
+private fun AccionesRapidasCard(
+    onInscribirseClick: () -> Unit = {},
+    onRegistrarAsistencia: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Acciones Rápidas",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1E3A8A),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Botón Inscribirse
+                Button(
+                    onClick = onInscribirseClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd,
+                            contentDescription = "Inscribirse",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Inscribirse",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                // Botón Registrar Asistencia
+                Button(
+                    onClick = onRegistrarAsistencia,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFDC2626)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Registrar",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Registrar",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun AsistenciaHistorialCard(

@@ -152,7 +152,8 @@ data class EstudianteResponse(
 // Request para inscribir estudiante a materia
 data class InscribirEstudianteRequest(
     val materia_id: Int,
-    val estudiante_id: Int
+    val estudiante_id: Int,
+    val docente_id: Int  // ← NUEVO CAMPO
 )
 
 // Response para inscripción exitosa
@@ -345,4 +346,57 @@ data class AsistenciaMateria(
     val nombreCompleto: String,
     val email: String,
     val carrera: String
+)
+
+// ============================================
+// MODELOS PARA QR DE INSCRIPCIÓN
+// ============================================
+
+// Request para generar QR de inscripción
+data class GenerarQRInscripcionRequest(
+    val materia_id: Int,
+    val docente_id: Int,
+    val duracion_dias: Int = 30
+)
+
+// Response del QR de inscripción generado
+data class QRInscripcionResponse(
+    val message: String,
+    val qr: QRInscripcionData
+)
+
+data class QRInscripcionData(
+    val qr_token: String,
+    val qr_image: String,
+    val expires_at: String,
+    val tipo: String,
+    val materia: MateriaQRInfo
+)
+
+data class MateriaQRInfo(
+    val id: Int,
+    val nombre: String,
+    val codigo: String,
+    val grupo: String
+)
+
+// ============================================
+// MODELOS PARA INSCRIPCIÓN POR QR (ESTUDIANTE)
+// ============================================
+
+// Request para inscribirse mediante QR
+data class InscribirseQRRequest(
+    val qr_token: String,
+    val estudiante_id: Int
+)
+
+// Response de inscripción exitosa por QR
+data class InscripcionQRResponse(
+    val message: String,
+    val asignacion: AsignacionQRInfo
+)
+
+data class AsignacionQRInfo(
+    val estudiante_id: Int,
+    val materia_id: Int
 )

@@ -99,6 +99,16 @@
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
 
         <activity
+            android:name=".activities.GenerarQRInscripcionActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+
+        <activity
+            android:name=".activities.InscribirseQRActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+
+        <activity
             android:name=".activities.HistorialAsistenciasActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />

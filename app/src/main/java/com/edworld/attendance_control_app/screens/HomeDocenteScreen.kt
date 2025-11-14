@@ -29,6 +29,7 @@ fun HomeDocenteScreen(
     onQRScanClick: () -> Unit = {},
     onAsistenciasClick: () -> Unit = {},
     onInscribirEstudiantesClick: () -> Unit = {},
+    onGenerarQRInscripcion: (Int) -> Unit = {},
     onLogoutClick: () -> Unit = {},
     materias: List<Materia> = emptyList(),
     isLoading: Boolean = false,
@@ -203,7 +204,8 @@ fun HomeDocenteScreen(
                     items(materiasFiltradas) { materia ->
                         MateriaCard(
                             materia = materia,
-                            onEditarClick = onEditarMateriaClick
+                            onEditarClick = onEditarMateriaClick,
+                            onGenerarQRInscripcion = onGenerarQRInscripcion
                         )
                     }
 
@@ -218,7 +220,11 @@ fun HomeDocenteScreen(
 }
 
 @Composable
-private fun MateriaCard(materia: Materia, onEditarClick: (Int) -> Unit = {}) {
+private fun MateriaCard(
+    materia: Materia,
+    onEditarClick: (Int) -> Unit = {},
+    onGenerarQRInscripcion: (Int) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -328,21 +334,46 @@ private fun MateriaCard(materia: Materia, onEditarClick: (Int) -> Unit = {}) {
                     )
                 }
 
-                // Botón Editar
-                Button(
-                    onClick = { onEditarClick(materia.id) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1E3A8A)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.height(28.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                // Row con botones QR y Editar
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Editar",
-                        fontSize = 10.sp,
-                        color = Color.White
-                    )
+                    // NUEVO: Botón QR Inscripción
+                    IconButton(
+                        onClick = { onGenerarQRInscripcion(materia.id) },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                Color(0xFF4CAF50).copy(alpha = 0.1f),
+                                RoundedCornerShape(8.dp)
+                            ),
+                        enabled = materia.activo
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCode,
+                            contentDescription = "Generar QR Inscripción",
+                            tint = if (materia.activo) Color(0xFF4CAF50) else Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Botón Editar (existente)
+                    Button(
+                        onClick = { onEditarClick(materia.id) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1E3A8A)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(28.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                    ) {
+                        Text(
+                            text = "Editar",
+                            fontSize = 10.sp,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }

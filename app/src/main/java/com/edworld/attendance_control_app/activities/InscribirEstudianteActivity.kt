@@ -24,10 +24,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.edworld.attendance_control_app.dataStore
+import com.edworld.attendance_control_app.USER_ID_KEY
 import com.edworld.attendance_control_app.data.models.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class InscribirEstudianteActivity : ComponentActivity() {
@@ -52,9 +55,6 @@ class InscribirEstudianteActivity : ComponentActivity() {
     private var materiaNombre by mutableStateOf("")
     private var materiaCodigo by mutableStateOf("")
     private var materiaGrupo by mutableStateOf("")
-
-//    val url: String = "http://192.168.100.101:3000"
-//        val url:String="http://172.20.10.3:300"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +95,11 @@ class InscribirEstudianteActivity : ComponentActivity() {
 
         // Cargar estudiantes inscritos al iniciar
         loadEstudiantesInscritos()
+    }
+
+    // Método para obtener el ID del docente desde DataStore
+    private suspend fun getUserId(): String? {
+        return dataStore.data.first()[USER_ID_KEY]
     }
 
     private fun buscarEstudiante() {
@@ -176,12 +181,23 @@ class InscribirEstudianteActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             try {
+                // Obtener el ID del docente desde DataStore
+                val docenteId = getUserId()
+
+                if (docenteId.isNullOrEmpty()) {
+                    errorMessage = "Error: No se pudo identificar al docente. Inicia sesión nuevamente."
+                    isInscribing = false
+                    return@launch
+                }
+
+                // Crear request con docente_id
                 val request = InscribirEstudianteRequest(
                     materia_id = materiaId,
-                    estudiante_id = estudianteEncontrado!!.id
+                    estudiante_id = estudianteEncontrado!!.id,
+                    docente_id = docenteId.toInt()
                 )
 
-                val response = ApiClient.client.post("${Constants.BASE_URL}/academic/asignacion") {
+                val response = ApiClient.client.post("${Constants.BASE_URL}/academic/asignacion/docente") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
@@ -206,6 +222,20 @@ class InscribirEstudianteActivity : ComponentActivity() {
                         val errorResponse = response.body<Map<String, String>>()
                         errorMessage = errorResponse["error"]
                             ?: "No se puede asignar estudiantes a una materia inactiva"
+                        isInscribing = false
+                    }
+
+                    HttpStatusCode.Forbidden -> {
+                        val errorResponse = response.body<Map<String, String>>()
+                        errorMessage = errorResponse["error"]
+                            ?: "No tienes permiso para inscribir estudiantes en esta materia"
+                        isInscribing = false
+                    }
+
+                    HttpStatusCode.NotFound -> {
+                        val errorResponse = response.body<Map<String, String>>()
+                        errorMessage = errorResponse["error"]
+                            ?: "Materia o estudiante no encontrado"
                         isInscribing = false
                     }
 
